@@ -1,0 +1,283 @@
+#include "zake/lexer.hpp"
+
+#include <cctype>
+#include <unordered_map>
+#include <utility>
+
+namespace zake {
+
+namespace {
+
+const std::unordered_map<std::string, TokenType> kKeywords = {
+    {"let", TokenType::Let},
+    {"print", TokenType::Print},
+    {"true", TokenType::True},
+    {"false", TokenType::False},
+};
+
+} // namespace
+
+ZakeError::ZakeError(std::string message, SourceLocation location)
+    : std::runtime_error(std::move(message)), location_(location) {}
+
+const SourceLocation& ZakeError::location() const noexcept {
+    return location_;
+}
+
+LexerError::LexerError(std::string message, SourceLocation location)
+    : ZakeError(std::move(message), location) {}
+
+ParseError::ParseError(std::string message, SourceLocation location)
+    : ZakeError(std::move(message), location) {}
+
+RuntimeError::RuntimeError(std::string message, SourceLocation location)
+    : ZakeError(std::move(message), location) {}
+
+std::string token_type_name(TokenType type) {
+    switch (type) {
+    case TokenType::LeftParen:
+        return "(";
+    case TokenType::RightParen:
+        return ")";
+    case TokenType::Plus:
+        return "+";
+    case TokenType::Minus:
+        return "-";
+    case TokenType::Star:
+        return "*";
+    case TokenType::Slash:
+        return "/";
+    case TokenType::Equal:
+        return "=";
+    case TokenType::Identifier:
+        return "identifier";
+    case TokenType::Number:
+        return "number";
+    case TokenType::String:
+        return "string";
+    case TokenType::Let:
+        return "let";
+    case TokenType::Print:
+        return "print";
+    case TokenType::True:
+        return "true";
+    case TokenType::False:
+        return "false";
+    case TokenType::Newline:
+        return "newline";
+    case TokenType::EndOfFile:
+        return "end of file";
+    }
+
+    return "unknown";
+}
+
+Lexer::Lexer(std::string source)
+    : source_(std::move(source)) {}
+
+std::vector<Token> Lexer::scanTokens() {
+    while (!isAtEnd()) {
+        start_ = current_;
+        token_line_ = line_;
+        token_column_ = column_;
+        scanToken();
+    }
+
+    tokens_.push_back(Token {TokenType::EndOfFile, "", SourceLocation {line_, column_}});
+    return tokens_;
+}
+
+bool Lexer::isAtEnd() const {
+    return current_ >= source_.size();
+}
+
+char Lexer::advance() {
+    const char ch = source_[current_++];
+    ++column_;
+    return ch;
+}
+
+char Lexer::peek() const {
+    if (isAtEnd()) {
+        return '\0';
+    }
+    return source_[current_];
+}
+
+char Lexer::peekNext() const {
+    if (current_ + 1 >= source_.size()) {
+        return '\0';
+    }
+    return source_[current_ + 1];
+}
+
+bool Lexer::match(char expected) {
+    if (isAtEnd() || source_[current_] != expected) {
+        return false;
+    }
+    advance();
+    return true;
+}
+
+void Lexer::scanToken() {
+    const char ch = advance();
+
+    switch (ch) {
+    case '(':
+        addToken(TokenType::LeftParen, "(");
+        return;
+    case ')':
+        addToken(TokenType::RightParen, ")");
+        return;
+    case '+':
+        addToken(TokenType::Plus, "+");
+        return;
+    case '-':
+        addToken(TokenType::Minus, "-");
+        return;
+    case '*':
+        addToken(TokenType::Star, "*");
+        return;
+    case '=':
+        addToken(TokenType::Equal, "=");
+        return;
+    case '/':
+        if (match('/')) {
+            skipComment();
+            return;
+        }
+        addToken(TokenType::Slash, "/");
+        return;
+    case '"':
+        readString();
+        return;
+    case ' ':
+    case '\t':
+        return;
+    case '\n':
+        addToken(TokenType::Newline, "\\n");
+        ++line_;
+        column_ = 1;
+        return;
+    case '\r':
+        if (peek() == '\n') {
+            advance();
+        }
+        addToken(TokenType::Newline, "\\n");
+        ++line_;
+        column_ = 1;
+        return;
+    default:
+        break;
+    }
+
+    if (std::isdigit(static_cast<unsigned char>(ch))) {
+        readNumber();
+        return;
+    }
+
+    if (isIdentifierStart(ch)) {
+        readIdentifier();
+        return;
+    }
+
+    throw LexerError("Unexpected character '" + std::string(1, ch) + "'.", SourceLocation {token_line_, token_column_});
+}
+
+void Lexer::readString() {
+    std::string value;
+
+    while (!isAtEnd()) {
+        const char ch = advance();
+
+        if (ch == '"') {
+            addToken(TokenType::String, value);
+            return;
+        }
+
+        if (ch == '\n' || ch == '\r') {
+            throw LexerError("Unterminated string literal.", SourceLocation {token_line_, token_column_});
+        }
+
+        if (ch == '\\') {
+            if (isAtEnd()) {
+                throw LexerError("Unterminated string literal.", SourceLocation {token_line_, token_column_});
+            }
+
+            const char escaped = advance();
+            switch (escaped) {
+            case 'n':
+                value.push_back('\n');
+                break;
+            case 't':
+                value.push_back('\t');
+                break;
+            case '"':
+                value.push_back('"');
+                break;
+            case '\\':
+                value.push_back('\\');
+                break;
+            default:
+                value.push_back(escaped);
+                break;
+            }
+            continue;
+        }
+
+        value.push_back(ch);
+    }
+
+    throw LexerError("Unterminated string literal.", SourceLocation {token_line_, token_column_});
+}
+
+void Lexer::readNumber() {
+    while (std::isdigit(static_cast<unsigned char>(peek()))) {
+        advance();
+    }
+
+    if (peek() == '.' && std::isdigit(static_cast<unsigned char>(peekNext()))) {
+        advance();
+        while (std::isdigit(static_cast<unsigned char>(peek()))) {
+            advance();
+        }
+    }
+
+    const std::string lexeme = source_.substr(start_, current_ - start_);
+    addToken(TokenType::Number, lexeme);
+}
+
+void Lexer::readIdentifier() {
+    while (isIdentifierPart(peek())) {
+        advance();
+    }
+
+    const std::string lexeme = source_.substr(start_, current_ - start_);
+    const auto keyword = kKeywords.find(lexeme);
+    if (keyword != kKeywords.end()) {
+        addToken(keyword->second, lexeme);
+        return;
+    }
+
+    addToken(TokenType::Identifier, lexeme);
+}
+
+void Lexer::skipComment() {
+    while (!isAtEnd() && peek() != '\n' && peek() != '\r') {
+        advance();
+    }
+}
+
+void Lexer::addToken(TokenType type, const std::string& lexeme) {
+    tokens_.push_back(Token {type, lexeme, SourceLocation {token_line_, token_column_}});
+}
+
+bool Lexer::isIdentifierStart(char ch) {
+    return std::isalpha(static_cast<unsigned char>(ch)) || ch == '_';
+}
+
+bool Lexer::isIdentifierPart(char ch) {
+    return std::isalnum(static_cast<unsigned char>(ch)) || ch == '_';
+}
+
+} // namespace zake

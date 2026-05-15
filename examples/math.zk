@@ -1,0 +1,5 @@
+let x = 10 + 20 * 2
+print(x)
+
+let y = (10 + 20) * 2
+print(y)
