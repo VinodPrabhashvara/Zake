@@ -12,22 +12,25 @@
 
 ## v0.2
 
-- equality and comparison operators
-- `if` and `else`
-- better parser recovery and richer diagnostics
-- more example programs
+- comparison operators: `==`, `!=`, `>`, `>=`, `<`, `<=`
+- logical operations: `not`, `and`, `or`
+- `if` and `else` statements
+- `while` loops
+- block scopes with `{ }`
+- focused tests and examples for control flow
 
 ## v0.3
 
 - functions
 - reusable modules
 - scoped environments
-- basic standard library helpers
+- separate assignment syntax
+- better parser recovery and richer diagnostics
 
 ## v0.4
 
 - lists or arrays
-- loops
+- loop controls such as `break` and `continue`
 - text utilities
 - file helpers for safe local workflows
 

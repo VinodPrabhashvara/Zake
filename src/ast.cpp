@@ -87,4 +87,44 @@ const Expr& LetStmt::initializer() const {
     return *initializer_;
 }
 
+BlockStmt::BlockStmt(SourceLocation location, std::vector<std::unique_ptr<Stmt>> statements)
+    : Stmt(location), statements_(std::move(statements)) {}
+
+const std::vector<std::unique_ptr<Stmt>>& BlockStmt::statements() const {
+    return statements_;
+}
+
+IfStmt::IfStmt(
+    SourceLocation location,
+    std::unique_ptr<Expr> condition,
+    std::unique_ptr<Stmt> thenBranch,
+    std::unique_ptr<Stmt> elseBranch)
+    : Stmt(location),
+      condition_(std::move(condition)),
+      thenBranch_(std::move(thenBranch)),
+      elseBranch_(std::move(elseBranch)) {}
+
+const Expr& IfStmt::condition() const {
+    return *condition_;
+}
+
+const Stmt& IfStmt::thenBranch() const {
+    return *thenBranch_;
+}
+
+const Stmt* IfStmt::elseBranch() const {
+    return elseBranch_.get();
+}
+
+WhileStmt::WhileStmt(SourceLocation location, std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body)
+    : Stmt(location), condition_(std::move(condition)), body_(std::move(body)) {}
+
+const Expr& WhileStmt::condition() const {
+    return *condition_;
+}
+
+const Stmt& WhileStmt::body() const {
+    return *body_;
+}
+
 } // namespace zake

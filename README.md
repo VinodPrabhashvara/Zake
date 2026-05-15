@@ -2,7 +2,7 @@
 
 **A small, Python-like programming language for learning, building, and growing into security-focused tooling.**
 
-Zake is a new programming language project built from scratch in C++17. The first release, Zake v0.1, focuses on a small but working interpreter with clear code, friendly errors, and a beginner-readable architecture. Future versions are planned to grow toward cybersecurity-focused standard libraries for ethical hacking, CTF workflows, file analysis, hashing, encoding, reporting, and defensive security.
+Zake is a new programming language project built from scratch in C++17. Zake v0.2 focuses on a small but useful interpreter with variables, expressions, control flow, clear code, and friendly errors. Future versions are planned to grow toward cybersecurity-focused standard libraries for ethical hacking, CTF workflows, file analysis, hashing, encoding, reporting, and defensive security.
 
 ## Features
 
@@ -12,6 +12,11 @@ Zake is a new programming language project built from scratch in C++17. The firs
 - `let` variables
 - number, string, and boolean literals
 - arithmetic with `+`, `-`, `*`, `/`
+- comparison operators: `==`, `!=`, `>`, `>=`, `<`, `<=`
+- logical operations: `not`, `and`, `or`
+- `if` / `else` statements
+- `while` loops
+- block scopes with `{ }`
 - parentheses for grouping
 - line comments with `//`
 - lexer, parser, and runtime errors with line and column information
@@ -29,6 +34,12 @@ print(age)
 
 let x = 10 + 20 * 2
 print(x)
+
+if age >= 18 {
+    print("adult")
+} else {
+    print("student")
+}
 ```
 
 ## Build Instructions
@@ -53,6 +64,7 @@ cmake --build build --config Release
 .\build\Release\zake.exe examples\hello.zk
 .\build\Release\zake.exe examples\variables.zk
 .\build\Release\zake.exe examples\math.zk
+.\build\Release\zake.exe examples\control_flow.zk
 ```
 
 ## Project Structure
@@ -77,8 +89,8 @@ zake/
 ## Roadmap
 
 - v0.1: core interpreter with variables, literals, math, comments, and friendly errors
-- v0.2: comparison operators, conditionals, and better diagnostics
-- v0.3: functions, blocks, and reusable modules
+- v0.2: comparisons, logical operations, block scopes, `if` / `else`, and `while`
+- v0.3: functions, reusable modules, and separate assignment syntax
 - v0.4: early standard library helpers
 - future: cybersecurity-focused standard libraries for ethical hacking and defensive tooling
 

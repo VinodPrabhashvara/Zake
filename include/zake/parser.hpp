@@ -26,7 +26,15 @@ private:
     std::unique_ptr<Stmt> statement();
     std::unique_ptr<Stmt> printStatement();
     std::unique_ptr<Stmt> letStatement();
+    std::unique_ptr<Stmt> ifStatement();
+    std::unique_ptr<Stmt> whileStatement();
+    std::unique_ptr<Stmt> blockStatement(const Token& leftBrace);
+    std::vector<std::unique_ptr<Stmt>> blockBody();
     std::unique_ptr<Expr> expression();
+    std::unique_ptr<Expr> logicOr();
+    std::unique_ptr<Expr> logicAnd();
+    std::unique_ptr<Expr> equality();
+    std::unique_ptr<Expr> comparison();
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> unary();

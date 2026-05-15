@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 
-project(Zake VERSION 0.1.0 LANGUAGES CXX)
+project(Zake VERSION 0.2.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -40,6 +40,9 @@ if(BUILD_TESTING)
     add_zake_test(example_hello "examples/hello.zk" ON "Hello Zake")
     add_zake_test(example_variables "examples/variables.zk" ON "Vinod__NL__17")
     add_zake_test(example_math "examples/math.zk" ON "50__NL__60")
+    add_zake_test(example_control_flow "examples/control_flow.zk" ON "passed__NL__0__NL__1__NL__2")
+    add_zake_test(control_if_else "tests/if_else.zk" ON "large__NL__logic-ok")
+    add_zake_test(control_while "tests/while.zk" ON "0__NL__1__NL__2__NL__done")
     add_zake_test(error_unterminated_string "tests/unterminated_string.zk" OFF "Unterminated string literal")
     add_zake_test(error_missing_paren "tests/missing_paren.zk" OFF "Expected ')' after expression")
     add_zake_test(error_unknown_variable "tests/unknown_variable.zk" OFF "Unknown variable 'missing'")

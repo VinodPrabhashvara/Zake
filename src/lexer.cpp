@@ -9,10 +9,16 @@ namespace zake {
 namespace {
 
 const std::unordered_map<std::string, TokenType> kKeywords = {
+    {"and", TokenType::And},
+    {"else", TokenType::Else},
+    {"if", TokenType::If},
     {"let", TokenType::Let},
+    {"not", TokenType::Not},
+    {"or", TokenType::Or},
     {"print", TokenType::Print},
     {"true", TokenType::True},
     {"false", TokenType::False},
+    {"while", TokenType::While},
 };
 
 } // namespace
@@ -39,6 +45,10 @@ std::string token_type_name(TokenType type) {
         return "(";
     case TokenType::RightParen:
         return ")";
+    case TokenType::LeftBrace:
+        return "{";
+    case TokenType::RightBrace:
+        return "}";
     case TokenType::Plus:
         return "+";
     case TokenType::Minus:
@@ -47,22 +57,48 @@ std::string token_type_name(TokenType type) {
         return "*";
     case TokenType::Slash:
         return "/";
+    case TokenType::Bang:
+        return "!";
+    case TokenType::BangEqual:
+        return "!=";
     case TokenType::Equal:
         return "=";
+    case TokenType::EqualEqual:
+        return "==";
+    case TokenType::Greater:
+        return ">";
+    case TokenType::GreaterEqual:
+        return ">=";
+    case TokenType::Less:
+        return "<";
+    case TokenType::LessEqual:
+        return "<=";
     case TokenType::Identifier:
         return "identifier";
     case TokenType::Number:
         return "number";
     case TokenType::String:
         return "string";
+    case TokenType::And:
+        return "and";
+    case TokenType::Else:
+        return "else";
+    case TokenType::If:
+        return "if";
     case TokenType::Let:
         return "let";
+    case TokenType::Not:
+        return "not";
+    case TokenType::Or:
+        return "or";
     case TokenType::Print:
         return "print";
     case TokenType::True:
         return "true";
     case TokenType::False:
         return "false";
+    case TokenType::While:
+        return "while";
     case TokenType::Newline:
         return "newline";
     case TokenType::EndOfFile:
@@ -129,6 +165,12 @@ void Lexer::scanToken() {
     case ')':
         addToken(TokenType::RightParen, ")");
         return;
+    case '{':
+        addToken(TokenType::LeftBrace, "{");
+        return;
+    case '}':
+        addToken(TokenType::RightBrace, "}");
+        return;
     case '+':
         addToken(TokenType::Plus, "+");
         return;
@@ -138,8 +180,17 @@ void Lexer::scanToken() {
     case '*':
         addToken(TokenType::Star, "*");
         return;
+    case '!':
+        addToken(match('=') ? TokenType::BangEqual : TokenType::Bang, source_.substr(start_, current_ - start_));
+        return;
     case '=':
-        addToken(TokenType::Equal, "=");
+        addToken(match('=') ? TokenType::EqualEqual : TokenType::Equal, source_.substr(start_, current_ - start_));
+        return;
+    case '>':
+        addToken(match('=') ? TokenType::GreaterEqual : TokenType::Greater, source_.substr(start_, current_ - start_));
+        return;
+    case '<':
+        addToken(match('=') ? TokenType::LessEqual : TokenType::Less, source_.substr(start_, current_ - start_));
         return;
     case '/':
         if (match('/')) {

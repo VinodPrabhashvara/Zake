@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include "zake/token.hpp"
 #include "zake/value.hpp"
@@ -106,6 +107,46 @@ public:
 private:
     std::string name_;
     std::unique_ptr<Expr> initializer_;
+};
+
+class BlockStmt final : public Stmt {
+public:
+    BlockStmt(SourceLocation location, std::vector<std::unique_ptr<Stmt>> statements);
+
+    const std::vector<std::unique_ptr<Stmt>>& statements() const;
+
+private:
+    std::vector<std::unique_ptr<Stmt>> statements_;
+};
+
+class IfStmt final : public Stmt {
+public:
+    IfStmt(
+        SourceLocation location,
+        std::unique_ptr<Expr> condition,
+        std::unique_ptr<Stmt> thenBranch,
+        std::unique_ptr<Stmt> elseBranch);
+
+    const Expr& condition() const;
+    const Stmt& thenBranch() const;
+    const Stmt* elseBranch() const;
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> thenBranch_;
+    std::unique_ptr<Stmt> elseBranch_;
+};
+
+class WhileStmt final : public Stmt {
+public:
+    WhileStmt(SourceLocation location, std::unique_ptr<Expr> condition, std::unique_ptr<Stmt> body);
+
+    const Expr& condition() const;
+    const Stmt& body() const;
+
+private:
+    std::unique_ptr<Expr> condition_;
+    std::unique_ptr<Stmt> body_;
 };
 
 } // namespace zake

@@ -1,0 +1,13 @@
+let score = 85
+
+if score >= 75 {
+    print("large")
+} else {
+    print("small")
+}
+
+if not false and score == 85 or false {
+    print("logic-ok")
+} else {
+    print("logic-bad")
+}

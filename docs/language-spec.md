@@ -1,6 +1,6 @@
-# Zake Language Spec v0.1
+# Zake Language Spec v0.2
 
-Zake v0.1 is a small, expression-based interpreter focused on a clean first release.
+Zake v0.2 is a small interpreter focused on expressions and control flow.
 
 ## File Extension
 
@@ -8,11 +8,22 @@ Zake v0.1 is a small, expression-based interpreter focused on a clean first rele
 
 ## Statements
 
-Zake v0.1 supports two statement forms:
+Zake v0.2 supports these statement forms:
 
 ```zk
 print(expression)
 let name = expression
+if condition {
+    statement
+} else {
+    statement
+}
+while condition {
+    statement
+}
+{
+    statement
+}
 ```
 
 Statements are separated by newlines or the end of the file.
@@ -32,16 +43,43 @@ Supported expression features:
 - variable references: `name`
 - grouping with parentheses: `(1 + 2) * 3`
 - unary minus: `-5`
+- logical not: `not ready`
 - arithmetic: `+`, `-`, `*`, `/`
+- comparison: `==`, `!=`, `>`, `>=`, `<`, `<=`
+- logical operations: `and`, `or`
 
 Operator precedence:
 
 1. parentheses
-2. unary minus
+2. unary minus and `not`
 3. multiplication and division
 4. addition and subtraction
+5. comparisons
+6. equality
+7. `and`
+8. `or`
 
-Arithmetic is numeric-only in v0.1. Trying to use strings or booleans with arithmetic operators raises a runtime error.
+Arithmetic and ordered comparisons are numeric-only. Equality works across values and returns `false` when the two values have different types. Conditions for `if`, `while`, `and`, `or`, and `not` must be booleans.
+
+## Control Flow
+
+```zk
+let score = 85
+
+if score >= 75 {
+    print("passed")
+} else {
+    print("failed")
+}
+
+let i = 0
+while i < 3 {
+    print(i)
+    let i = i + 1
+}
+```
+
+Blocks create scopes for new names. In v0.2, `let name = value` updates the nearest existing variable with that name when one exists; otherwise it defines a new variable in the current scope. This keeps loops usable before Zake adds a separate assignment operator.
 
 ## Comments
 
@@ -64,9 +102,8 @@ examples\broken.zk:1:7: parser error: Expected ')' after expression.
 ## Current Limits
 
 - no functions
-- no blocks
-- no conditionals
-- no loops
 - no string concatenation
-- no module loading
-- `stdlib/prelude.zk` is present in the repository but not auto-loaded yet
+- no modules
+- no separate assignment operator
+- no `break` or `continue`
+- no standard-library auto-loading

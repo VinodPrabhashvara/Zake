@@ -1,0 +1,13 @@
+let score = 85
+
+if score >= 75 {
+    print("passed")
+} else {
+    print("failed")
+}
+
+let i = 0
+while i < 3 {
+    print(i)
+    let i = i + 1
+}

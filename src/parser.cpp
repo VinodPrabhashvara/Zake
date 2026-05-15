@@ -75,6 +75,14 @@ void Parser::skipNewlines() {
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
+    if (match(TokenType::If)) {
+        return ifStatement();
+    }
+
+    if (match(TokenType::While)) {
+        return whileStatement();
+    }
+
     if (match(TokenType::Print)) {
         return printStatement();
     }
@@ -83,7 +91,11 @@ std::unique_ptr<Stmt> Parser::statement() {
         return letStatement();
     }
 
-    throw ParseError("Expected a statement starting with 'print' or 'let'.", peek().location);
+    if (match(TokenType::LeftBrace)) {
+        return blockStatement(previous());
+    }
+
+    throw ParseError("Expected a statement starting with 'if', 'while', 'print', 'let', or '{'.", peek().location);
 }
 
 std::unique_ptr<Stmt> Parser::printStatement() {
@@ -102,8 +114,115 @@ std::unique_ptr<Stmt> Parser::letStatement() {
     return std::make_unique<LetStmt>(keyword.location, name.lexeme, std::move(initializer));
 }
 
+std::unique_ptr<Stmt> Parser::ifStatement() {
+    const Token keyword = previous();
+    auto condition = expression();
+    const Token leftBrace = consume(TokenType::LeftBrace, "Expected '{' after if condition.");
+    auto thenBranch = blockStatement(leftBrace);
+    std::unique_ptr<Stmt> elseBranch;
+
+    const std::size_t afterThenBranch = current_;
+    skipNewlines();
+
+    if (match(TokenType::Else)) {
+        const Token elseKeyword = previous();
+        const Token elseLeftBrace = consume(TokenType::LeftBrace, "Expected '{' after 'else'.");
+        elseBranch = blockStatement(elseLeftBrace);
+
+        if (elseBranch == nullptr) {
+            throw ParseError("Expected a block after 'else'.", elseKeyword.location);
+        }
+    } else {
+        current_ = afterThenBranch;
+    }
+
+    return std::make_unique<IfStmt>(keyword.location, std::move(condition), std::move(thenBranch), std::move(elseBranch));
+}
+
+std::unique_ptr<Stmt> Parser::whileStatement() {
+    const Token keyword = previous();
+    auto condition = expression();
+    const Token leftBrace = consume(TokenType::LeftBrace, "Expected '{' after while condition.");
+    auto body = blockStatement(leftBrace);
+    return std::make_unique<WhileStmt>(keyword.location, std::move(condition), std::move(body));
+}
+
+std::unique_ptr<Stmt> Parser::blockStatement(const Token& leftBrace) {
+    return std::make_unique<BlockStmt>(leftBrace.location, blockBody());
+}
+
+std::vector<std::unique_ptr<Stmt>> Parser::blockBody() {
+    std::vector<std::unique_ptr<Stmt>> statements;
+
+    skipNewlines();
+
+    while (!check(TokenType::RightBrace) && !isAtEnd()) {
+        statements.push_back(statement());
+
+        if (match(TokenType::Newline)) {
+            skipNewlines();
+            continue;
+        }
+
+        if (!check(TokenType::RightBrace) && !isAtEnd()) {
+            throw ParseError("Expected end of line or '}' after statement.", peek().location);
+        }
+    }
+
+    consume(TokenType::RightBrace, "Expected '}' after block.");
+    return statements;
+}
+
 std::unique_ptr<Expr> Parser::expression() {
-    return term();
+    return logicOr();
+}
+
+std::unique_ptr<Expr> Parser::logicOr() {
+    auto expr = logicAnd();
+
+    while (match(TokenType::Or)) {
+        const Token op = previous();
+        auto right = logicAnd();
+        expr = std::make_unique<BinaryExpr>(op.location, std::move(expr), op.type, std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::logicAnd() {
+    auto expr = equality();
+
+    while (match(TokenType::And)) {
+        const Token op = previous();
+        auto right = equality();
+        expr = std::make_unique<BinaryExpr>(op.location, std::move(expr), op.type, std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::equality() {
+    auto expr = comparison();
+
+    while (match(TokenType::EqualEqual) || match(TokenType::BangEqual)) {
+        const Token op = previous();
+        auto right = comparison();
+        expr = std::make_unique<BinaryExpr>(op.location, std::move(expr), op.type, std::move(right));
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::comparison() {
+    auto expr = term();
+
+    while (match(TokenType::Greater) || match(TokenType::GreaterEqual) || match(TokenType::Less) || match(TokenType::LessEqual)) {
+        const Token op = previous();
+        auto right = term();
+        expr = std::make_unique<BinaryExpr>(op.location, std::move(expr), op.type, std::move(right));
+    }
+
+    return expr;
 }
 
 std::unique_ptr<Expr> Parser::term() {
@@ -131,7 +250,7 @@ std::unique_ptr<Expr> Parser::factor() {
 }
 
 std::unique_ptr<Expr> Parser::unary() {
-    if (match(TokenType::Minus)) {
+    if (match(TokenType::Minus) || match(TokenType::Not) || match(TokenType::Bang)) {
         const Token op = previous();
         auto right = unary();
         return std::make_unique<UnaryExpr>(op.location, op.type, std::move(right));
