@@ -1,6 +1,6 @@
-# Zake Language Spec v0.2
+# Zake Language Spec v0.3
 
-Zake v0.2 is a small interpreter focused on expressions and control flow.
+Zake v0.3 is a small interpreter focused on expressions, control flow, and functions.
 
 ## File Extension
 
@@ -8,11 +8,15 @@ Zake v0.2 is a small interpreter focused on expressions and control flow.
 
 ## Statements
 
-Zake v0.2 supports these statement forms:
+Zake v0.3 supports these statement forms:
 
 ```zk
 print(expression)
 let name = expression
+fn name(parameter, parameter) {
+    statement
+}
+return expression
 if condition {
     statement
 } else {
@@ -45,8 +49,10 @@ Supported expression features:
 - unary minus: `-5`
 - logical not: `not ready`
 - arithmetic: `+`, `-`, `*`, `/`
+- string concatenation with `+`
 - comparison: `==`, `!=`, `>`, `>=`, `<`, `<=`
 - logical operations: `and`, `or`
+- function calls: `name(argument, argument)`
 
 Operator precedence:
 
@@ -59,7 +65,7 @@ Operator precedence:
 7. `and`
 8. `or`
 
-Arithmetic and ordered comparisons are numeric-only. Equality works across values and returns `false` when the two values have different types. Conditions for `if`, `while`, `and`, `or`, and `not` must be booleans.
+Arithmetic and ordered comparisons are numeric-only. The `+` operator also joins two strings. Equality works across values and returns `false` when the two values have different types. Conditions for `if`, `while`, `and`, `or`, and `not` must be booleans.
 
 ## Control Flow
 
@@ -79,7 +85,29 @@ while i < 3 {
 }
 ```
 
-Blocks create scopes for new names. In v0.2, `let name = value` updates the nearest existing variable with that name when one exists; otherwise it defines a new variable in the current scope. This keeps loops usable before Zake adds a separate assignment operator.
+Blocks create scopes for new names. `let name = value` updates the nearest existing variable with that name when one exists; otherwise it defines a new variable in the current scope. This keeps loops usable before Zake adds a separate assignment operator.
+
+## Functions
+
+```zk
+fn add(a, b) {
+    return a + b
+}
+
+print(add(10, 20))
+
+fn factorial(n) {
+    if n <= 1 {
+        return 1
+    }
+
+    return n * factorial(n - 1)
+}
+
+print(factorial(5))
+```
+
+Functions are declared with `fn`, receive positional arguments, and run with a fresh local parameter scope. Nested block scopes still work inside functions. Recursive calls are supported through normal variable lookup.
 
 ## Comments
 
@@ -101,9 +129,9 @@ examples\broken.zk:1:7: parser error: Expected ')' after expression.
 
 ## Current Limits
 
-- no functions
-- no string concatenation
 - no modules
 - no separate assignment operator
+- no anonymous functions
+- no closures as a documented feature
 - no `break` or `continue`
 - no standard-library auto-loading

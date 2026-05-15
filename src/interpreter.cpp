@@ -1,9 +1,27 @@
 #include "zake/interpreter.hpp"
 
 #include <iostream>
+#include <stdexcept>
 #include <utility>
 
 namespace zake {
+
+namespace {
+
+class ReturnSignal final : public std::runtime_error {
+public:
+    explicit ReturnSignal(Value value)
+        : std::runtime_error("return"), value_(std::move(value)) {}
+
+    const Value& value() const {
+        return value_;
+    }
+
+private:
+    Value value_;
+};
+
+} // namespace
 
 void Interpreter::execute(const std::vector<std::unique_ptr<Stmt>>& statements) {
     for (const auto& statement : statements) {
@@ -12,6 +30,21 @@ void Interpreter::execute(const std::vector<std::unique_ptr<Stmt>>& statements) 
 }
 
 void Interpreter::executeStatement(const Stmt& statement) {
+    if (const auto* function = dynamic_cast<const FunctionStmt*>(&statement)) {
+        auto functionValue = std::make_shared<FunctionValue>();
+        functionValue->name = function->name();
+        functionValue->declaration = function;
+        scopes_.back()[function->name()] = Value::function(std::move(functionValue));
+        return;
+    }
+
+    if (const auto* returnStatement = dynamic_cast<const ReturnStmt*>(&statement)) {
+        if (call_depth_ == 0) {
+            throw RuntimeError("'return' can only be used inside a function.", returnStatement->location());
+        }
+        throw ReturnSignal(evaluate(returnStatement->value()));
+    }
+
     if (const auto* block = dynamic_cast<const BlockStmt*>(&statement)) {
         executeBlock(block->statements());
         return;
@@ -39,6 +72,11 @@ void Interpreter::executeStatement(const Stmt& statement) {
         return;
     }
 
+    if (const auto* expression = dynamic_cast<const ExpressionStmt*>(&statement)) {
+        evaluate(expression->expression());
+        return;
+    }
+
     if (const auto* let = dynamic_cast<const LetStmt*>(&statement)) {
         assignOrDefine(let->name(), evaluate(let->initializer()));
         return;
@@ -62,6 +100,43 @@ void Interpreter::executeBlock(const std::vector<std::unique_ptr<Stmt>>& stateme
     scopes_.pop_back();
 }
 
+Value Interpreter::callFunction(const FunctionValue& function, const std::vector<Value>& arguments, const SourceLocation& location) {
+    if (function.declaration == nullptr) {
+        throw RuntimeError("Cannot call function '" + function.name + "' because its declaration is missing.", location);
+    }
+
+    const auto& parameters = function.declaration->parameters();
+    if (arguments.size() != parameters.size()) {
+        throw RuntimeError(
+            "Function '" + function.name + "' expected " + std::to_string(parameters.size()) + " argument(s), but got " + std::to_string(arguments.size()) + ".",
+            location);
+    }
+
+    scopes_.push_back({});
+    for (std::size_t index = 0; index < parameters.size(); ++index) {
+        scopes_.back()[parameters[index]] = arguments[index];
+    }
+
+    ++call_depth_;
+    try {
+        for (const auto& statement : function.declaration->body()) {
+            executeStatement(*statement);
+        }
+    } catch (const ReturnSignal& signal) {
+        --call_depth_;
+        scopes_.pop_back();
+        return signal.value();
+    } catch (...) {
+        --call_depth_;
+        scopes_.pop_back();
+        throw;
+    }
+
+    --call_depth_;
+    scopes_.pop_back();
+    return Value::nil();
+}
+
 Value Interpreter::evaluate(const Expr& expression) {
     if (const auto* literal = dynamic_cast<const LiteralExpr*>(&expression)) {
         return evaluateLiteral(*literal);
@@ -69,6 +144,10 @@ Value Interpreter::evaluate(const Expr& expression) {
 
     if (const auto* variable = dynamic_cast<const VariableExpr*>(&expression)) {
         return evaluateVariable(*variable);
+    }
+
+    if (const auto* call = dynamic_cast<const CallExpr*>(&expression)) {
+        return evaluateCall(*call);
     }
 
     if (const auto* unary = dynamic_cast<const UnaryExpr*>(&expression)) {
@@ -92,6 +171,21 @@ Value Interpreter::evaluateLiteral(const LiteralExpr& expression) {
 
 Value Interpreter::evaluateVariable(const VariableExpr& expression) {
     return lookupVariable(expression.name(), expression.location());
+}
+
+Value Interpreter::evaluateCall(const CallExpr& expression) {
+    const Value callee = evaluate(expression.callee());
+    if (!callee.isFunction()) {
+        throw RuntimeError("Only functions can be called. Got " + callee.typeName() + ".", expression.location());
+    }
+
+    std::vector<Value> arguments;
+    arguments.reserve(expression.arguments().size());
+    for (const auto& argument : expression.arguments()) {
+        arguments.push_back(evaluate(*argument));
+    }
+
+    return callFunction(*callee.asFunction(), arguments, expression.location());
 }
 
 Value Interpreter::evaluateUnary(const UnaryExpr& expression) {
@@ -133,6 +227,9 @@ Value Interpreter::evaluateBinary(const BinaryExpr& expression) {
 
     switch (expression.op()) {
     case TokenType::Plus:
+        if (left.isString() && right.isString()) {
+            return Value::string(left.asString() + right.asString());
+        }
         requireNumberPair(left, right, expression.location());
         return Value::number(left.asNumber() + right.asNumber());
     case TokenType::Minus:
@@ -220,6 +317,10 @@ bool Interpreter::valuesEqual(const Value& left, const Value& right) {
 
     if (left.isBoolean()) {
         return left.asBoolean() == right.asBoolean();
+    }
+
+    if (left.isFunction()) {
+        return left.asFunction() == right.asFunction();
     }
 
     return true;

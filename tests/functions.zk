@@ -1,0 +1,22 @@
+fn greet(name) {
+    print("Hello " + name)
+}
+
+fn add(a, b) {
+    return a + b
+}
+
+fn multiply(a, b) {
+    return a * b
+}
+
+fn double_add(a, b) {
+    {
+        let total = add(a, b)
+        return multiply(total, 2)
+    }
+}
+
+greet("Tester")
+print(add(5, 7))
+print(double_add(5, 7))

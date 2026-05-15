@@ -21,16 +21,18 @@
 
 ## v0.3
 
-- functions
-- reusable modules
-- scoped environments
-- separate assignment syntax
-- better parser recovery and richer diagnostics
+- function declarations with `fn`
+- function calls with parameters
+- `return` statements
+- local function scope
+- recursion support
 
 ## v0.4
 
 - lists or arrays
 - loop controls such as `break` and `continue`
+- separate assignment syntax
+- reusable modules
 - text utilities
 - file helpers for safe local workflows
 

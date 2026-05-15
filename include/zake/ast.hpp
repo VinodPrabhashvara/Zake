@@ -40,6 +40,18 @@ private:
     std::string name_;
 };
 
+class CallExpr final : public Expr {
+public:
+    CallExpr(SourceLocation location, std::unique_ptr<Expr> callee, std::vector<std::unique_ptr<Expr>> arguments);
+
+    const Expr& callee() const;
+    const std::vector<std::unique_ptr<Expr>>& arguments() const;
+
+private:
+    std::unique_ptr<Expr> callee_;
+    std::vector<std::unique_ptr<Expr>> arguments_;
+};
+
 class UnaryExpr final : public Expr {
 public:
     UnaryExpr(SourceLocation location, TokenType op, std::unique_ptr<Expr> right);
@@ -97,6 +109,16 @@ private:
     std::unique_ptr<Expr> expression_;
 };
 
+class ExpressionStmt final : public Stmt {
+public:
+    ExpressionStmt(SourceLocation location, std::unique_ptr<Expr> expression);
+
+    const Expr& expression() const;
+
+private:
+    std::unique_ptr<Expr> expression_;
+};
+
 class LetStmt final : public Stmt {
 public:
     LetStmt(SourceLocation location, std::string name, std::unique_ptr<Expr> initializer);
@@ -107,6 +129,30 @@ public:
 private:
     std::string name_;
     std::unique_ptr<Expr> initializer_;
+};
+
+class FunctionStmt final : public Stmt {
+public:
+    FunctionStmt(SourceLocation location, std::string name, std::vector<std::string> parameters, std::vector<std::unique_ptr<Stmt>> body);
+
+    const std::string& name() const;
+    const std::vector<std::string>& parameters() const;
+    const std::vector<std::unique_ptr<Stmt>>& body() const;
+
+private:
+    std::string name_;
+    std::vector<std::string> parameters_;
+    std::vector<std::unique_ptr<Stmt>> body_;
+};
+
+class ReturnStmt final : public Stmt {
+public:
+    ReturnStmt(SourceLocation location, std::unique_ptr<Expr> value);
+
+    const Expr& value() const;
+
+private:
+    std::unique_ptr<Expr> value_;
 };
 
 class BlockStmt final : public Stmt {

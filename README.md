@@ -2,7 +2,7 @@
 
 **A small, Python-like programming language for learning, building, and growing into security-focused tooling.**
 
-Zake is a new programming language project built from scratch in C++17. Zake v0.2 focuses on a small but useful interpreter with variables, expressions, control flow, clear code, and friendly errors. Future versions are planned to grow toward cybersecurity-focused standard libraries for ethical hacking, CTF workflows, file analysis, hashing, encoding, reporting, and defensive security.
+Zake is a new programming language project built from scratch in C++17. Zake v0.3 focuses on a small but useful interpreter with variables, expressions, control flow, functions, clear code, and friendly errors. Future versions are planned to grow toward cybersecurity-focused standard libraries for ethical hacking, CTF workflows, file analysis, hashing, encoding, reporting, and defensive security.
 
 ## Features
 
@@ -17,6 +17,10 @@ Zake is a new programming language project built from scratch in C++17. Zake v0.
 - `if` / `else` statements
 - `while` loops
 - block scopes with `{ }`
+- function declarations with `fn`
+- function calls with parameters
+- `return` statements
+- recursion support
 - parentheses for grouping
 - line comments with `//`
 - lexer, parser, and runtime errors with line and column information
@@ -40,6 +44,12 @@ if age >= 18 {
 } else {
     print("student")
 }
+
+fn add(a, b) {
+    return a + b
+}
+
+print(add(10, 20))
 ```
 
 ## Build Instructions
@@ -65,6 +75,7 @@ cmake --build build --config Release
 .\build\Release\zake.exe examples\variables.zk
 .\build\Release\zake.exe examples\math.zk
 .\build\Release\zake.exe examples\control_flow.zk
+.\build\Release\zake.exe examples\functions.zk
 ```
 
 ## Project Structure
@@ -90,7 +101,7 @@ zake/
 
 - v0.1: core interpreter with variables, literals, math, comments, and friendly errors
 - v0.2: comparisons, logical operations, block scopes, `if` / `else`, and `while`
-- v0.3: functions, reusable modules, and separate assignment syntax
+- v0.3: function declarations, calls, parameters, returns, local function scope, and recursion
 - v0.4: early standard library helpers
 - future: cybersecurity-focused standard libraries for ethical hacking and defensive tooling
 

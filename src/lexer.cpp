@@ -11,11 +11,13 @@ namespace {
 const std::unordered_map<std::string, TokenType> kKeywords = {
     {"and", TokenType::And},
     {"else", TokenType::Else},
+    {"fn", TokenType::Fn},
     {"if", TokenType::If},
     {"let", TokenType::Let},
     {"not", TokenType::Not},
     {"or", TokenType::Or},
     {"print", TokenType::Print},
+    {"return", TokenType::Return},
     {"true", TokenType::True},
     {"false", TokenType::False},
     {"while", TokenType::While},
@@ -49,6 +51,8 @@ std::string token_type_name(TokenType type) {
         return "{";
     case TokenType::RightBrace:
         return "}";
+    case TokenType::Comma:
+        return ",";
     case TokenType::Plus:
         return "+";
     case TokenType::Minus:
@@ -83,6 +87,8 @@ std::string token_type_name(TokenType type) {
         return "and";
     case TokenType::Else:
         return "else";
+    case TokenType::Fn:
+        return "fn";
     case TokenType::If:
         return "if";
     case TokenType::Let:
@@ -93,6 +99,8 @@ std::string token_type_name(TokenType type) {
         return "or";
     case TokenType::Print:
         return "print";
+    case TokenType::Return:
+        return "return";
     case TokenType::True:
         return "true";
     case TokenType::False:
@@ -170,6 +178,9 @@ void Lexer::scanToken() {
         return;
     case '}':
         addToken(TokenType::RightBrace, "}");
+        return;
+    case ',':
+        addToken(TokenType::Comma, ",");
         return;
     case '+':
         addToken(TokenType::Plus, "+");

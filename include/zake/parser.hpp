@@ -24,7 +24,10 @@ private:
     const Token& consume(TokenType type, const std::string& message);
     void skipNewlines();
     std::unique_ptr<Stmt> statement();
+    std::unique_ptr<Stmt> functionStatement();
     std::unique_ptr<Stmt> printStatement();
+    std::unique_ptr<Stmt> expressionStatement();
+    std::unique_ptr<Stmt> returnStatement();
     std::unique_ptr<Stmt> letStatement();
     std::unique_ptr<Stmt> ifStatement();
     std::unique_ptr<Stmt> whileStatement();
@@ -38,6 +41,8 @@ private:
     std::unique_ptr<Expr> term();
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> unary();
+    std::unique_ptr<Expr> call();
+    std::unique_ptr<Expr> finishCall(std::unique_ptr<Expr> callee, const Token& leftParen);
     std::unique_ptr<Expr> primary();
 
     std::vector<Token> tokens_;

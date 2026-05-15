@@ -25,6 +25,10 @@ Value Value::boolean(bool value) {
     return Value(value);
 }
 
+Value Value::function(std::shared_ptr<FunctionValue> value) {
+    return Value(std::move(value));
+}
+
 Value Value::nil() {
     return Value();
 }
@@ -39,6 +43,9 @@ ValueType Value::type() const {
     if (std::holds_alternative<bool>(data_)) {
         return ValueType::Boolean;
     }
+    if (std::holds_alternative<std::shared_ptr<FunctionValue>>(data_)) {
+        return ValueType::Function;
+    }
     return ValueType::Nil;
 }
 
@@ -52,6 +59,10 @@ bool Value::isString() const {
 
 bool Value::isBoolean() const {
     return type() == ValueType::Boolean;
+}
+
+bool Value::isFunction() const {
+    return type() == ValueType::Function;
 }
 
 bool Value::isNil() const {
@@ -77,6 +88,13 @@ bool Value::asBoolean() const {
         throw std::logic_error("Value is not a boolean.");
     }
     return std::get<bool>(data_);
+}
+
+const std::shared_ptr<FunctionValue>& Value::asFunction() const {
+    if (!std::holds_alternative<std::shared_ptr<FunctionValue>>(data_)) {
+        throw std::logic_error("Value is not a function.");
+    }
+    return std::get<std::shared_ptr<FunctionValue>>(data_);
 }
 
 std::string Value::toString() const {
@@ -105,6 +123,10 @@ std::string Value::toString() const {
         return asBoolean() ? "true" : "false";
     }
 
+    if (isFunction()) {
+        return "<fn " + asFunction()->name + ">";
+    }
+
     return "nil";
 }
 
@@ -116,6 +138,8 @@ std::string Value::typeName() const {
         return "string";
     case ValueType::Boolean:
         return "boolean";
+    case ValueType::Function:
+        return "function";
     case ValueType::Nil:
         return "nil";
     }

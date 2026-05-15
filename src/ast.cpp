@@ -27,6 +27,17 @@ const std::string& VariableExpr::name() const {
     return name_;
 }
 
+CallExpr::CallExpr(SourceLocation location, std::unique_ptr<Expr> callee, std::vector<std::unique_ptr<Expr>> arguments)
+    : Expr(location), callee_(std::move(callee)), arguments_(std::move(arguments)) {}
+
+const Expr& CallExpr::callee() const {
+    return *callee_;
+}
+
+const std::vector<std::unique_ptr<Expr>>& CallExpr::arguments() const {
+    return arguments_;
+}
+
 UnaryExpr::UnaryExpr(SourceLocation location, TokenType op, std::unique_ptr<Expr> right)
     : Expr(location), op_(op), right_(std::move(right)) {}
 
@@ -76,6 +87,13 @@ const Expr& PrintStmt::expression() const {
     return *expression_;
 }
 
+ExpressionStmt::ExpressionStmt(SourceLocation location, std::unique_ptr<Expr> expression)
+    : Stmt(location), expression_(std::move(expression)) {}
+
+const Expr& ExpressionStmt::expression() const {
+    return *expression_;
+}
+
 LetStmt::LetStmt(SourceLocation location, std::string name, std::unique_ptr<Expr> initializer)
     : Stmt(location), name_(std::move(name)), initializer_(std::move(initializer)) {}
 
@@ -85,6 +103,28 @@ const std::string& LetStmt::name() const {
 
 const Expr& LetStmt::initializer() const {
     return *initializer_;
+}
+
+FunctionStmt::FunctionStmt(SourceLocation location, std::string name, std::vector<std::string> parameters, std::vector<std::unique_ptr<Stmt>> body)
+    : Stmt(location), name_(std::move(name)), parameters_(std::move(parameters)), body_(std::move(body)) {}
+
+const std::string& FunctionStmt::name() const {
+    return name_;
+}
+
+const std::vector<std::string>& FunctionStmt::parameters() const {
+    return parameters_;
+}
+
+const std::vector<std::unique_ptr<Stmt>>& FunctionStmt::body() const {
+    return body_;
+}
+
+ReturnStmt::ReturnStmt(SourceLocation location, std::unique_ptr<Expr> value)
+    : Stmt(location), value_(std::move(value)) {}
+
+const Expr& ReturnStmt::value() const {
+    return *value_;
 }
 
 BlockStmt::BlockStmt(SourceLocation location, std::vector<std::unique_ptr<Stmt>> statements)

@@ -75,6 +75,10 @@ void Parser::skipNewlines() {
 }
 
 std::unique_ptr<Stmt> Parser::statement() {
+    if (match(TokenType::Fn)) {
+        return functionStatement();
+    }
+
     if (match(TokenType::If)) {
         return ifStatement();
     }
@@ -87,6 +91,10 @@ std::unique_ptr<Stmt> Parser::statement() {
         return printStatement();
     }
 
+    if (match(TokenType::Return)) {
+        return returnStatement();
+    }
+
     if (match(TokenType::Let)) {
         return letStatement();
     }
@@ -95,7 +103,25 @@ std::unique_ptr<Stmt> Parser::statement() {
         return blockStatement(previous());
     }
 
-    throw ParseError("Expected a statement starting with 'if', 'while', 'print', 'let', or '{'.", peek().location);
+    return expressionStatement();
+}
+
+std::unique_ptr<Stmt> Parser::functionStatement() {
+    const Token keyword = previous();
+    const Token name = consume(TokenType::Identifier, "Expected a function name after 'fn'.");
+    consume(TokenType::LeftParen, "Expected '(' after function name.");
+
+    std::vector<std::string> parameters;
+    if (!check(TokenType::RightParen)) {
+        do {
+            const Token parameter = consume(TokenType::Identifier, "Expected parameter name.");
+            parameters.push_back(parameter.lexeme);
+        } while (match(TokenType::Comma));
+    }
+
+    consume(TokenType::RightParen, "Expected ')' after function parameters.");
+    consume(TokenType::LeftBrace, "Expected '{' before function body.");
+    return std::make_unique<FunctionStmt>(keyword.location, name.lexeme, std::move(parameters), blockBody());
 }
 
 std::unique_ptr<Stmt> Parser::printStatement() {
@@ -104,6 +130,17 @@ std::unique_ptr<Stmt> Parser::printStatement() {
     auto value = expression();
     consume(TokenType::RightParen, "Expected ')' after expression.");
     return std::make_unique<PrintStmt>(keyword.location, std::move(value));
+}
+
+std::unique_ptr<Stmt> Parser::expressionStatement() {
+    auto value = expression();
+    return std::make_unique<ExpressionStmt>(value->location(), std::move(value));
+}
+
+std::unique_ptr<Stmt> Parser::returnStatement() {
+    const Token keyword = previous();
+    auto value = expression();
+    return std::make_unique<ReturnStmt>(keyword.location, std::move(value));
 }
 
 std::unique_ptr<Stmt> Parser::letStatement() {
@@ -256,7 +293,35 @@ std::unique_ptr<Expr> Parser::unary() {
         return std::make_unique<UnaryExpr>(op.location, op.type, std::move(right));
     }
 
-    return primary();
+    return call();
+}
+
+std::unique_ptr<Expr> Parser::call() {
+    auto expr = primary();
+
+    while (true) {
+        if (match(TokenType::LeftParen)) {
+            expr = finishCall(std::move(expr), previous());
+            continue;
+        }
+
+        break;
+    }
+
+    return expr;
+}
+
+std::unique_ptr<Expr> Parser::finishCall(std::unique_ptr<Expr> callee, const Token& leftParen) {
+    std::vector<std::unique_ptr<Expr>> arguments;
+
+    if (!check(TokenType::RightParen)) {
+        do {
+            arguments.push_back(expression());
+        } while (match(TokenType::Comma));
+    }
+
+    consume(TokenType::RightParen, "Expected ')' after function call arguments.");
+    return std::make_unique<CallExpr>(leftParen.location, std::move(callee), std::move(arguments));
 }
 
 std::unique_ptr<Expr> Parser::primary() {
