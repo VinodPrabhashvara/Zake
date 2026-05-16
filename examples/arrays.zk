@@ -1,0 +1,30 @@
+let nums = [10, 20, 30]
+print(nums[0])
+print(nums[1])
+print(nums[2])
+
+print(len(nums))
+
+push(nums, 40)
+print(len(nums))
+print(nums[3])
+
+let last = pop(nums)
+print(last)
+print(len(nums))
+
+print(type(nums))
+print(type("hello"))
+print(type(123))
+print(type(true))
+
+let mixed = ["Zake", 1, true]
+print(mixed[0])
+print(mixed[1])
+print(mixed[2])
+
+fn first(arr) {
+    return arr[0]
+}
+
+print(first(nums))

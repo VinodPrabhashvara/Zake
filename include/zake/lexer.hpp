@@ -21,6 +21,7 @@ private:
     bool match(char expected);
     void scanToken();
     void readString();
+    void readMultilineString();
     void readNumber();
     void readIdentifier();
     void skipComment();

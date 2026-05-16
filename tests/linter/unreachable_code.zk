@@ -1,0 +1,6 @@
+fn done() {
+    return 1
+    print("unreachable")
+}
+
+print(done())

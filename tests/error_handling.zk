@@ -1,0 +1,33 @@
+import std.error
+import std.file
+
+try {
+    throw "Something went wrong"
+} catch err {
+    print(err)
+}
+
+try {
+    throw error("Structured")
+} catch err {
+    print(err["type"])
+    print(err["message"])
+}
+
+try {
+    read_file("tests/no_such_file_for_error_test.txt")
+} catch err {
+    print(err["type"])
+    print(err["line"] > 0)
+    print(err["column"] > 0)
+}
+
+fn returns_from_try() {
+    try {
+        return "returned"
+    } catch err {
+        return "caught"
+    }
+}
+
+print(returns_from_try())

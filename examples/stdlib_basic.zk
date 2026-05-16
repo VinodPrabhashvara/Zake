@@ -1,0 +1,37 @@
+import std.string
+import std.math
+import std.encoding
+import std.time
+import std.path
+
+print(upper("zake"))
+print(lower("ZAKE"))
+print(contains("hello zake", "zake"))
+print(starts_with("zake language", "zake"))
+print(ends_with("main.zk", ".zk"))
+print(trim("   hello   "))
+print(length("Vinod"))
+
+print(square(5))
+print(cube(3))
+print(sqrt(81))
+print(abs(-10))
+print(min(10, 20))
+print(max(10, 20))
+print(round(10.6))
+
+let encoded = base64_encode("hello")
+print(encoded)
+print(base64_decode(encoded))
+
+let hexed = hex_encode("zake")
+print(hexed)
+print(hex_decode(hexed))
+
+print(now())
+print(timestamp())
+
+print(join("examples", "hello.zk"))
+print(basename("examples/hello.zk"))
+print(dirname("examples/hello.zk"))
+print(extension("examples/hello.zk"))

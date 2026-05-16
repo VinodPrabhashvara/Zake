@@ -1,0 +1,7 @@
+fn now() {
+    return __now()
+}
+
+fn timestamp() {
+    return __timestamp()
+}

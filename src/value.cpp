@@ -29,6 +29,14 @@ Value Value::function(std::shared_ptr<FunctionValue> value) {
     return Value(std::move(value));
 }
 
+Value Value::array(std::shared_ptr<ArrayValue> value) {
+    return Value(std::move(value));
+}
+
+Value Value::map(std::shared_ptr<MapValue> value) {
+    return Value(std::move(value));
+}
+
 Value Value::nil() {
     return Value();
 }
@@ -45,6 +53,12 @@ ValueType Value::type() const {
     }
     if (std::holds_alternative<std::shared_ptr<FunctionValue>>(data_)) {
         return ValueType::Function;
+    }
+    if (std::holds_alternative<std::shared_ptr<ArrayValue>>(data_)) {
+        return ValueType::Array;
+    }
+    if (std::holds_alternative<std::shared_ptr<MapValue>>(data_)) {
+        return ValueType::Map;
     }
     return ValueType::Nil;
 }
@@ -63,6 +77,14 @@ bool Value::isBoolean() const {
 
 bool Value::isFunction() const {
     return type() == ValueType::Function;
+}
+
+bool Value::isArray() const {
+    return type() == ValueType::Array;
+}
+
+bool Value::isMap() const {
+    return type() == ValueType::Map;
 }
 
 bool Value::isNil() const {
@@ -97,6 +119,20 @@ const std::shared_ptr<FunctionValue>& Value::asFunction() const {
     return std::get<std::shared_ptr<FunctionValue>>(data_);
 }
 
+const std::shared_ptr<ArrayValue>& Value::asArray() const {
+    if (!std::holds_alternative<std::shared_ptr<ArrayValue>>(data_)) {
+        throw std::logic_error("Value is not an array.");
+    }
+    return std::get<std::shared_ptr<ArrayValue>>(data_);
+}
+
+const std::shared_ptr<MapValue>& Value::asMap() const {
+    if (!std::holds_alternative<std::shared_ptr<MapValue>>(data_)) {
+        throw std::logic_error("Value is not a map.");
+    }
+    return std::get<std::shared_ptr<MapValue>>(data_);
+}
+
 std::string Value::toString() const {
     if (isNumber()) {
         std::ostringstream stream;
@@ -127,6 +163,35 @@ std::string Value::toString() const {
         return "<fn " + asFunction()->name + ">";
     }
 
+    if (isArray()) {
+        std::ostringstream stream;
+        stream << "[";
+        const auto& elements = asArray()->elements;
+        for (std::size_t index = 0; index < elements.size(); ++index) {
+            if (index > 0) {
+                stream << ", ";
+            }
+            stream << elements[index].toString();
+        }
+        stream << "]";
+        return stream.str();
+    }
+
+    if (isMap()) {
+        std::ostringstream stream;
+        stream << "{";
+        const auto& map = asMap();
+        for (std::size_t index = 0; index < map->keys.size(); ++index) {
+            if (index > 0) {
+                stream << ", ";
+            }
+            const std::string& key = map->keys[index];
+            stream << key << ": " << map->entries.at(key).toString();
+        }
+        stream << "}";
+        return stream.str();
+    }
+
     return "nil";
 }
 
@@ -140,6 +205,10 @@ std::string Value::typeName() const {
         return "boolean";
     case ValueType::Function:
         return "function";
+    case ValueType::Array:
+        return "array";
+    case ValueType::Map:
+        return "map";
     case ValueType::Nil:
         return "nil";
     }

@@ -1,0 +1,3 @@
+import std.file
+
+write_file(123, "content")

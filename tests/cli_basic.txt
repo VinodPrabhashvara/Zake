@@ -1,0 +1,54 @@
+Zake v0.17 CLI smoke commands
+
+Build first:
+cmake -S . -B build
+cmake --build build --config Release
+
+Commands to test:
+.\build\Release\zake.exe --help
+.\build\Release\zake.exe -h
+.\build\Release\zake.exe --version
+.\build\Release\zake.exe -v
+.\build\Release\zake.exe examples\hello.zk
+.\build\Release\zake.exe --tokens examples\hello.zk
+.\build\Release\zake.exe --ast examples\hello.zk
+.\build\Release\zake.exe --check examples\hello.zk
+.\build\Release\zake.exe --check examples\diagnostics_error.zk
+.\build\Release\zake.exe test --help
+.\build\Release\zake.exe test
+.\build\Release\zake.exe test tests
+.\build\Release\zake.exe test tests\pass
+.\build\Release\zake.exe test tests\pass --verbose
+.\build\Release\zake.exe test tests\pass\hello.zk
+.\build\Release\zake.exe test tests\fail\divide_by_zero.zk
+.\build\Release\zake.exe fmt --help
+.\build\Release\zake.exe fmt examples\hello.zk --check
+.\build\Release\zake.exe fmt tests\formatter\expected_formatted.zk --check
+.\build\Release\zake.exe lint --help
+.\build\Release\zake.exe lint examples\hello.zk
+.\build\Release\zake.exe lint tests\linter
+.\build\Release\zake.exe lint tests\linter --strict
+.\build\Release\zake.exe repl --help
+.\build\Release\zake.exe repl
+.\build\Release\zake.exe project --help
+.\build\Release\zake.exe init sample-project
+
+Expected behavior:
+- --help prints usage, options, and examples.
+- --version prints Zake 0.17.0-alpha.
+- --tokens prints token type, lexeme, line, and column.
+- --ast prints a readable AST tree.
+- --check parses without running the program.
+- test discovers and runs .zk test files.
+- test treats tests\pass files as expected success.
+- test treats tests\fail files as expected failure.
+- test --verbose prints normal test output and expected-fail error messages.
+- fmt formats .zk files.
+- fmt --check reports formatting status without changing files.
+- lint reports warnings and errors for .zk files.
+- lint --strict returns non-zero when warnings are present.
+- repl starts an interactive prompt.
+- repl --help shows REPL commands.
+- project --help shows project commands.
+- init creates a basic zake.toml project.
+- Unknown options, missing files, and missing input files show clean errors and suggest --help.

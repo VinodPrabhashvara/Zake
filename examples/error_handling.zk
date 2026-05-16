@@ -1,0 +1,40 @@
+import std.error
+import std.file
+
+try {
+    throw error("Manual error test")
+} catch err {
+    print(err["type"])
+    print(err["message"])
+}
+
+try {
+    throw type_error("Expected number")
+} catch err {
+    print(err["type"])
+    print(err["message"])
+}
+
+try {
+    let content = read_file("missing_file.txt")
+    print(content)
+} catch err {
+    print("Caught file error")
+    print(err["message"])
+}
+
+fn risky(value) {
+    if value == 0 {
+        throw error("Value cannot be zero")
+    }
+
+    return 100 / value
+}
+
+try {
+    print(risky(10))
+    print(risky(0))
+} catch err {
+    print("Caught function error")
+    print(err["message"])
+}

@@ -1,0 +1,15 @@
+fn hex_encode(text) {
+    return __hex_encode(text)
+}
+
+fn hex_decode(hex) {
+    return __hex_decode(hex)
+}
+
+fn base64_encode(text) {
+    return __base64_encode(text)
+}
+
+fn base64_decode(text) {
+    return __base64_decode(text)
+}

@@ -1,0 +1,47 @@
+fn upper(text) {
+    return __upper(text)
+}
+
+fn lower(text) {
+    return __lower(text)
+}
+
+fn contains(text, part) {
+    return __contains(text, part)
+}
+
+fn starts_with(text, part) {
+    return __starts_with(text, part)
+}
+
+fn ends_with(text, part) {
+    return __ends_with(text, part)
+}
+
+fn trim(text) {
+    return __trim(text)
+}
+
+fn length(text) {
+    return __strlen(text)
+}
+
+fn split(text, sep) {
+    return __split(text, sep)
+}
+
+fn replace(text, old, new) {
+    return __replace(text, old, new)
+}
+
+fn substring(text, start, end) {
+    return __substring(text, start, end)
+}
+
+fn char_at(text, index) {
+    return __char_at(text, index)
+}
+
+fn index_of(text, part) {
+    return __index_of(text, part)
+}

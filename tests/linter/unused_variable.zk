@@ -1,0 +1,4 @@
+let used = 1
+print(used)
+
+let unused = 2

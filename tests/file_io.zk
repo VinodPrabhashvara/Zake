@@ -1,0 +1,18 @@
+import std.file
+
+let path = "tests/tmp_zake_file_test.txt"
+
+write_file(path, "abc")
+print(exists(path))
+print(is_file(path))
+print(is_dir(path))
+
+append_file(path, "123")
+print(read_file(path))
+print(file_size(path))
+
+let items = list_dir("tests")
+print(type(items))
+
+remove_file(path)
+print(exists(path))

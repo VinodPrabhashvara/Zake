@@ -1,0 +1,28 @@
+let config = {
+    "name": "Zake",
+    "version": "0.5",
+    "active": true,
+    "items": [1, 2]
+}
+
+print(config["name"])
+print(config["version"])
+print(config["active"])
+
+config["name"] = "ZakeLang"
+config["extra"] = 123
+
+print(config["name"])
+print(config["extra"])
+print(len(config))
+
+let k = keys(config)
+print(k[0])
+print(k[4])
+
+let v = values(config)
+print(v[0])
+
+remove(config, "version")
+print(has(config, "version"))
+print(len(config))

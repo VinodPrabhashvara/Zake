@@ -1,0 +1,2 @@
+// Intentional parser error for CLI diagnostics examples.
+print("missing closing parenthesis"

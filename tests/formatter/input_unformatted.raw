@@ -1,0 +1,25 @@
+// formatter fixture
+fn add(a,b){
+let result=a+b
+return result
+}
+fn demo(values){
+if len(values)>0{
+print(values[0])
+}else{
+print("empty")
+}
+while len(values)<3{
+push(values,len(values)+1)
+}
+try{
+let item={"name":"Zake","tags":["fmt","cli"]}
+print(item["name"])
+}catch err{
+print(err)
+}
+}
+
+let nums=[1,2]
+demo(nums)
+print(add(10,20))

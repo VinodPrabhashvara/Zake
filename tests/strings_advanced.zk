@@ -1,0 +1,28 @@
+import std.string as string
+
+let name = "Vinod"
+let age = 17
+
+fn double(value) {
+    return value * 2
+}
+
+print("Hello ${name}, age ${age}")
+print("Sum ${10 + 5} call ${double(4)}")
+print("Line A\nLine B")
+
+let text = """
+Hello
+Zake
+"""
+
+print(text)
+
+let parts = string.split("red,green,blue", ",")
+print(parts[0])
+print(len(parts))
+print(string.replace("hello zake", "zake", "Vinod"))
+print(string.substring("ZakeLang", 1, 5))
+print(string.char_at("Vinod", 0))
+print(string.index_of("hello zake", "zake"))
+print(string.length("Vinod"))

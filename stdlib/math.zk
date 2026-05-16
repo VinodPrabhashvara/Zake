@@ -1,0 +1,27 @@
+fn square(x) {
+    return x * x
+}
+
+fn cube(x) {
+    return x * x * x
+}
+
+fn sqrt(x) {
+    return __sqrt(x)
+}
+
+fn abs(x) {
+    return __abs(x)
+}
+
+fn min(a, b) {
+    return __min(a, b)
+}
+
+fn max(a, b) {
+    return __max(a, b)
+}
+
+fn round(x) {
+    return __round(x)
+}

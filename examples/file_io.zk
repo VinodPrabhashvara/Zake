@@ -1,0 +1,21 @@
+import std.file
+
+let path = "examples/tmp_zake_test.txt"
+
+write_file(path, "Hello Zake File I/O")
+print(exists(path))
+print(is_file(path))
+print(is_dir(path))
+print(read_file(path))
+
+append_file(path, "\nSecond line")
+print(read_file(path))
+
+print(file_size(path))
+
+let items = list_dir("examples")
+print(type(items))
+print(len(items))
+
+remove_file(path)
+print(exists(path))

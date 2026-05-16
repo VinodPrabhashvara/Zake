@@ -1,0 +1,37 @@
+// Zake standard library: file helpers
+
+fn read_file(path) {
+    return __read_file(path)
+}
+
+fn write_file(path, content) {
+    return __write_file(path, content)
+}
+
+fn append_file(path, content) {
+    return __append_file(path, content)
+}
+
+fn exists(path) {
+    return __exists(path)
+}
+
+fn is_file(path) {
+    return __is_file(path)
+}
+
+fn is_dir(path) {
+    return __is_dir(path)
+}
+
+fn list_dir(path) {
+    return __list_dir(path)
+}
+
+fn file_size(path) {
+    return __file_size(path)
+}
+
+fn remove_file(path) {
+    return __remove_file(path)
+}

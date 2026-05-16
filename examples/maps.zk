@@ -1,0 +1,48 @@
+let user = {
+    "name": "Vinod",
+    "age": 17,
+    "verified": true
+}
+
+print(user["name"])
+print(user["age"])
+print(user["verified"])
+
+user["country"] = "Sri Lanka"
+print(user["country"])
+
+print(len(user))
+print(type(user))
+
+print(has(user, "name"))
+print(has(user, "email"))
+
+let k = keys(user)
+print(type(k))
+print(len(k))
+
+let v = values(user)
+print(type(v))
+print(len(v))
+
+remove(user, "verified")
+print(has(user, "verified"))
+
+let profile = {
+    "username": "vinod",
+    "skills": ["cpp", "security", "iot"],
+    "meta": {
+        "project": "Zake",
+        "version": "0.5"
+    }
+}
+
+print(profile["username"])
+print(profile["skills"][0])
+print(profile["meta"]["project"])
+
+fn get_name(obj) {
+    return obj["name"]
+}
+
+print(get_name(user))

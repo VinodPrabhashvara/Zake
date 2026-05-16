@@ -1,0 +1,12 @@
+import "greetings.zk"
+import "math_utils.zk"
+
+greet("Vinod")
+print(add(10, 20))
+
+import std.string
+import std.math
+
+print(upper("zake"))
+print(lower("ZAKE"))
+print(square(5))

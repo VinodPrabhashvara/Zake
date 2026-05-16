@@ -7,3 +7,15 @@
 *.suo
 *.vcxproj.user
 *.log
+build/
+.vs/
+out/
+CMakeFiles/
+CMakeCache.txt
+*.user
+*.suo
+*.obj
+*.exe
+*.pdb
+sample-project/
+demo-project/

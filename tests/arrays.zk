@@ -1,0 +1,18 @@
+let values = [1, 2, 3]
+print(values[0])
+
+values[1] = 9
+print(values[1])
+
+push(values, "left")
+print(len(values) - 1)
+print(type(values))
+print(type(values[3]))
+print(type(values[0]))
+print(type(true))
+
+fn last(arr) {
+    return arr[len(arr) - 1]
+}
+
+print(last(values))

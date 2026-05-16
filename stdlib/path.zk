@@ -1,0 +1,15 @@
+fn join(a, b) {
+    return __path_join(a, b)
+}
+
+fn basename(path) {
+    return __path_basename(path)
+}
+
+fn dirname(path) {
+    return __path_dirname(path)
+}
+
+fn extension(path) {
+    return __path_extension(path)
+}

@@ -10,14 +10,20 @@ namespace {
 
 const std::unordered_map<std::string, TokenType> kKeywords = {
     {"and", TokenType::And},
+    {"as", TokenType::As},
+    {"catch", TokenType::Catch},
     {"else", TokenType::Else},
     {"fn", TokenType::Fn},
+    {"from", TokenType::From},
     {"if", TokenType::If},
+    {"import", TokenType::Import},
     {"let", TokenType::Let},
     {"not", TokenType::Not},
     {"or", TokenType::Or},
     {"print", TokenType::Print},
     {"return", TokenType::Return},
+    {"throw", TokenType::Throw},
+    {"try", TokenType::Try},
     {"true", TokenType::True},
     {"false", TokenType::False},
     {"while", TokenType::While},
@@ -51,8 +57,16 @@ std::string token_type_name(TokenType type) {
         return "{";
     case TokenType::RightBrace:
         return "}";
+    case TokenType::LeftBracket:
+        return "[";
+    case TokenType::RightBracket:
+        return "]";
     case TokenType::Comma:
         return ",";
+    case TokenType::Colon:
+        return ":";
+    case TokenType::Dot:
+        return ".";
     case TokenType::Plus:
         return "+";
     case TokenType::Minus:
@@ -85,12 +99,20 @@ std::string token_type_name(TokenType type) {
         return "string";
     case TokenType::And:
         return "and";
+    case TokenType::As:
+        return "as";
+    case TokenType::Catch:
+        return "catch";
     case TokenType::Else:
         return "else";
     case TokenType::Fn:
         return "fn";
+    case TokenType::From:
+        return "from";
     case TokenType::If:
         return "if";
+    case TokenType::Import:
+        return "import";
     case TokenType::Let:
         return "let";
     case TokenType::Not:
@@ -101,6 +123,10 @@ std::string token_type_name(TokenType type) {
         return "print";
     case TokenType::Return:
         return "return";
+    case TokenType::Throw:
+        return "throw";
+    case TokenType::Try:
+        return "try";
     case TokenType::True:
         return "true";
     case TokenType::False:
@@ -179,8 +205,20 @@ void Lexer::scanToken() {
     case '}':
         addToken(TokenType::RightBrace, "}");
         return;
+    case '[':
+        addToken(TokenType::LeftBracket, "[");
+        return;
+    case ']':
+        addToken(TokenType::RightBracket, "]");
+        return;
     case ',':
         addToken(TokenType::Comma, ",");
+        return;
+    case ':':
+        addToken(TokenType::Colon, ":");
+        return;
+    case '.':
+        addToken(TokenType::Dot, ".");
         return;
     case '+':
         addToken(TokenType::Plus, "+");
@@ -211,6 +249,12 @@ void Lexer::scanToken() {
         addToken(TokenType::Slash, "/");
         return;
     case '"':
+        if (peek() == '"' && peekNext() == '"') {
+            advance();
+            advance();
+            readMultilineString();
+            return;
+        }
         readString();
         return;
     case ' ':
@@ -274,6 +318,9 @@ void Lexer::readString() {
             case 't':
                 value.push_back('\t');
                 break;
+            case 'r':
+                value.push_back('\r');
+                break;
             case '"':
                 value.push_back('"');
                 break;
@@ -291,6 +338,76 @@ void Lexer::readString() {
     }
 
     throw LexerError("Unterminated string literal.", SourceLocation {token_line_, token_column_});
+}
+
+void Lexer::readMultilineString() {
+    std::string value;
+
+    if (peek() == '\r' || peek() == '\n') {
+        const char newline = advance();
+        if (newline == '\r' && peek() == '\n') {
+            advance();
+        }
+        ++line_;
+        column_ = 1;
+    }
+
+    while (!isAtEnd()) {
+        const char ch = advance();
+
+        if (ch == '"' && peek() == '"' && peekNext() == '"') {
+            advance();
+            advance();
+            if (!value.empty() && value.back() == '\n') {
+                value.pop_back();
+            }
+            addToken(TokenType::String, value);
+            return;
+        }
+
+        if (ch == '\n' || ch == '\r') {
+            if (ch == '\r' && peek() == '\n') {
+                advance();
+            }
+            value.push_back('\n');
+            ++line_;
+            column_ = 1;
+            continue;
+        }
+
+        if (ch == '\\') {
+            if (isAtEnd()) {
+                throw LexerError("Unterminated multiline string literal.", SourceLocation {token_line_, token_column_});
+            }
+
+            const char escaped = advance();
+            switch (escaped) {
+            case 'n':
+                value.push_back('\n');
+                break;
+            case 't':
+                value.push_back('\t');
+                break;
+            case 'r':
+                value.push_back('\r');
+                break;
+            case '"':
+                value.push_back('"');
+                break;
+            case '\\':
+                value.push_back('\\');
+                break;
+            default:
+                value.push_back(escaped);
+                break;
+            }
+            continue;
+        }
+
+        value.push_back(ch);
+    }
+
+    throw LexerError("Unterminated multiline string literal.", SourceLocation {token_line_, token_column_});
 }
 
 void Lexer::readNumber() {

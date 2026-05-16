@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
 #include "zake/token.hpp"
@@ -50,6 +51,58 @@ public:
 private:
     std::unique_ptr<Expr> callee_;
     std::vector<std::unique_ptr<Expr>> arguments_;
+};
+
+class ArrayExpr final : public Expr {
+public:
+    ArrayExpr(SourceLocation location, std::vector<std::unique_ptr<Expr>> elements);
+
+    const std::vector<std::unique_ptr<Expr>>& elements() const;
+
+private:
+    std::vector<std::unique_ptr<Expr>> elements_;
+};
+
+struct MapEntry {
+    std::string key;
+    SourceLocation location;
+    std::unique_ptr<Expr> value;
+};
+
+class MapExpr final : public Expr {
+public:
+    MapExpr(SourceLocation location, std::vector<MapEntry> entries);
+
+    const std::vector<MapEntry>& entries() const;
+
+private:
+    std::vector<MapEntry> entries_;
+};
+
+class IndexExpr final : public Expr {
+public:
+    IndexExpr(SourceLocation location, std::unique_ptr<Expr> object, std::unique_ptr<Expr> index);
+
+    const Expr& object() const;
+    const Expr& index() const;
+    std::unique_ptr<Expr> takeObject();
+    std::unique_ptr<Expr> takeIndex();
+
+private:
+    std::unique_ptr<Expr> object_;
+    std::unique_ptr<Expr> index_;
+};
+
+class MemberExpr final : public Expr {
+public:
+    MemberExpr(SourceLocation location, std::unique_ptr<Expr> object, std::string member);
+
+    const Expr& object() const;
+    const std::string& member() const;
+
+private:
+    std::unique_ptr<Expr> object_;
+    std::string member_;
 };
 
 class UnaryExpr final : public Expr {
@@ -131,6 +184,43 @@ private:
     std::unique_ptr<Expr> initializer_;
 };
 
+class ImportStmt final : public Stmt {
+public:
+    ImportStmt(
+        SourceLocation location,
+        std::string module,
+        bool standardLibrary,
+        std::string alias = "",
+        std::vector<std::string> symbols = {});
+
+    const std::string& module() const;
+    bool isStandardLibrary() const;
+    const std::string& alias() const;
+    const std::vector<std::string>& symbols() const;
+    bool hasAlias() const;
+    bool isSelective() const;
+
+private:
+    std::string module_;
+    bool standardLibrary_;
+    std::string alias_;
+    std::vector<std::string> symbols_;
+};
+
+class IndexAssignStmt final : public Stmt {
+public:
+    IndexAssignStmt(SourceLocation location, std::unique_ptr<Expr> object, std::unique_ptr<Expr> index, std::unique_ptr<Expr> value);
+
+    const Expr& object() const;
+    const Expr& index() const;
+    const Expr& value() const;
+
+private:
+    std::unique_ptr<Expr> object_;
+    std::unique_ptr<Expr> index_;
+    std::unique_ptr<Expr> value_;
+};
+
 class FunctionStmt final : public Stmt {
 public:
     FunctionStmt(SourceLocation location, std::string name, std::vector<std::string> parameters, std::vector<std::unique_ptr<Stmt>> body);
@@ -148,6 +238,16 @@ private:
 class ReturnStmt final : public Stmt {
 public:
     ReturnStmt(SourceLocation location, std::unique_ptr<Expr> value);
+
+    const Expr& value() const;
+
+private:
+    std::unique_ptr<Expr> value_;
+};
+
+class ThrowStmt final : public Stmt {
+public:
+    ThrowStmt(SourceLocation location, std::unique_ptr<Expr> value);
 
     const Expr& value() const;
 
@@ -193,6 +293,24 @@ public:
 private:
     std::unique_ptr<Expr> condition_;
     std::unique_ptr<Stmt> body_;
+};
+
+class TryCatchStmt final : public Stmt {
+public:
+    TryCatchStmt(
+        SourceLocation location,
+        std::vector<std::unique_ptr<Stmt>> tryBody,
+        std::string catchName,
+        std::vector<std::unique_ptr<Stmt>> catchBody);
+
+    const std::vector<std::unique_ptr<Stmt>>& tryBody() const;
+    const std::string& catchName() const;
+    const std::vector<std::unique_ptr<Stmt>>& catchBody() const;
+
+private:
+    std::vector<std::unique_ptr<Stmt>> tryBody_;
+    std::string catchName_;
+    std::vector<std::unique_ptr<Stmt>> catchBody_;
 };
 
 } // namespace zake

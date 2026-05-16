@@ -1,0 +1,15 @@
+import std.string as string
+import std.math as math
+from std.encoding import base64_encode, base64_decode
+import "math_utils.zk" as utils
+
+print(string.upper("zake"))
+print(string.lower("ZAKE"))
+print(math.square(5))
+print(math.cube(3))
+
+let encoded = base64_encode("hello")
+print(encoded)
+print(base64_decode(encoded))
+
+print(utils.add(10, 20))

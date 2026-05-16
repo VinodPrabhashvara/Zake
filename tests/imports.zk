@@ -1,0 +1,16 @@
+import "import_once.zk"
+import "import_once.zk"
+import "../examples/greetings.zk"
+import "../examples/math_utils.zk"
+import "../examples/math_utils.zk"
+import std.string
+import std.math
+
+greet("Tester")
+print(add(2, 3))
+print(upper("zake"))
+print(lower("ZAKE"))
+print(square(6))
+print(cube(3))
+print(contains("zake language", "lang"))
+print(sqrt(49))

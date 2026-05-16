@@ -38,6 +38,50 @@ const std::vector<std::unique_ptr<Expr>>& CallExpr::arguments() const {
     return arguments_;
 }
 
+ArrayExpr::ArrayExpr(SourceLocation location, std::vector<std::unique_ptr<Expr>> elements)
+    : Expr(location), elements_(std::move(elements)) {}
+
+const std::vector<std::unique_ptr<Expr>>& ArrayExpr::elements() const {
+    return elements_;
+}
+
+MapExpr::MapExpr(SourceLocation location, std::vector<MapEntry> entries)
+    : Expr(location), entries_(std::move(entries)) {}
+
+const std::vector<MapEntry>& MapExpr::entries() const {
+    return entries_;
+}
+
+IndexExpr::IndexExpr(SourceLocation location, std::unique_ptr<Expr> object, std::unique_ptr<Expr> index)
+    : Expr(location), object_(std::move(object)), index_(std::move(index)) {}
+
+const Expr& IndexExpr::object() const {
+    return *object_;
+}
+
+const Expr& IndexExpr::index() const {
+    return *index_;
+}
+
+std::unique_ptr<Expr> IndexExpr::takeObject() {
+    return std::move(object_);
+}
+
+std::unique_ptr<Expr> IndexExpr::takeIndex() {
+    return std::move(index_);
+}
+
+MemberExpr::MemberExpr(SourceLocation location, std::unique_ptr<Expr> object, std::string member)
+    : Expr(location), object_(std::move(object)), member_(std::move(member)) {}
+
+const Expr& MemberExpr::object() const {
+    return *object_;
+}
+
+const std::string& MemberExpr::member() const {
+    return member_;
+}
+
 UnaryExpr::UnaryExpr(SourceLocation location, TokenType op, std::unique_ptr<Expr> right)
     : Expr(location), op_(op), right_(std::move(right)) {}
 
@@ -105,6 +149,57 @@ const Expr& LetStmt::initializer() const {
     return *initializer_;
 }
 
+ImportStmt::ImportStmt(
+    SourceLocation location,
+    std::string module,
+    bool standardLibrary,
+    std::string alias,
+    std::vector<std::string> symbols)
+    : Stmt(location),
+      module_(std::move(module)),
+      standardLibrary_(standardLibrary),
+      alias_(std::move(alias)),
+      symbols_(std::move(symbols)) {}
+
+const std::string& ImportStmt::module() const {
+    return module_;
+}
+
+bool ImportStmt::isStandardLibrary() const {
+    return standardLibrary_;
+}
+
+const std::string& ImportStmt::alias() const {
+    return alias_;
+}
+
+const std::vector<std::string>& ImportStmt::symbols() const {
+    return symbols_;
+}
+
+bool ImportStmt::hasAlias() const {
+    return !alias_.empty();
+}
+
+bool ImportStmt::isSelective() const {
+    return !symbols_.empty();
+}
+
+IndexAssignStmt::IndexAssignStmt(SourceLocation location, std::unique_ptr<Expr> object, std::unique_ptr<Expr> index, std::unique_ptr<Expr> value)
+    : Stmt(location), object_(std::move(object)), index_(std::move(index)), value_(std::move(value)) {}
+
+const Expr& IndexAssignStmt::object() const {
+    return *object_;
+}
+
+const Expr& IndexAssignStmt::index() const {
+    return *index_;
+}
+
+const Expr& IndexAssignStmt::value() const {
+    return *value_;
+}
+
 FunctionStmt::FunctionStmt(SourceLocation location, std::string name, std::vector<std::string> parameters, std::vector<std::unique_ptr<Stmt>> body)
     : Stmt(location), name_(std::move(name)), parameters_(std::move(parameters)), body_(std::move(body)) {}
 
@@ -124,6 +219,13 @@ ReturnStmt::ReturnStmt(SourceLocation location, std::unique_ptr<Expr> value)
     : Stmt(location), value_(std::move(value)) {}
 
 const Expr& ReturnStmt::value() const {
+    return *value_;
+}
+
+ThrowStmt::ThrowStmt(SourceLocation location, std::unique_ptr<Expr> value)
+    : Stmt(location), value_(std::move(value)) {}
+
+const Expr& ThrowStmt::value() const {
     return *value_;
 }
 
@@ -165,6 +267,28 @@ const Expr& WhileStmt::condition() const {
 
 const Stmt& WhileStmt::body() const {
     return *body_;
+}
+
+TryCatchStmt::TryCatchStmt(
+    SourceLocation location,
+    std::vector<std::unique_ptr<Stmt>> tryBody,
+    std::string catchName,
+    std::vector<std::unique_ptr<Stmt>> catchBody)
+    : Stmt(location),
+      tryBody_(std::move(tryBody)),
+      catchName_(std::move(catchName)),
+      catchBody_(std::move(catchBody)) {}
+
+const std::vector<std::unique_ptr<Stmt>>& TryCatchStmt::tryBody() const {
+    return tryBody_;
+}
+
+const std::string& TryCatchStmt::catchName() const {
+    return catchName_;
+}
+
+const std::vector<std::unique_ptr<Stmt>>& TryCatchStmt::catchBody() const {
+    return catchBody_;
 }
 
 } // namespace zake

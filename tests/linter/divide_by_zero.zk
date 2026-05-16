@@ -1,0 +1,5 @@
+fn risky() {
+    return 10 / 0
+}
+
+print("not called")

@@ -1,0 +1,22 @@
+// Zake standard library: structured error values
+
+fn error(message) {
+    return {
+        "type": "Error",
+        "message": message
+    }
+}
+
+fn type_error(message) {
+    return {
+        "type": "TypeError",
+        "message": message
+    }
+}
+
+fn file_error(message) {
+    return {
+        "type": "FileError",
+        "message": message
+    }
+}
